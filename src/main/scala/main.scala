@@ -22,12 +22,9 @@ object Main extends App {
       creat
 
     case LogEntry.Dup(dup) if dup.status >= 0 =>
-      fdDB get dup.oldFd match {
-        case Some(file) =>
-          fdDB += (dup.newFd -> file)
-        case None =>
-          fdDB += (dup.newFd -> "no entry for dup found, probably PIPE")
-      }
+      val where = fdDB get dup.oldFd
+      val file = where.fold("no entry for dup found, probably PIPE")(identity)
+      fdDB += (dup.newFd -> file)
       dup
 
     case LogEntry.Open(open) if open.status >= 0 =>
