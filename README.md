@@ -29,7 +29,7 @@ cat strace.log.27049 | strace-analyzer read | column -t
 More help can be found here:
 
 ```bash
-strace --help
+strace-analyzer --help
 ```
 
 caveats
