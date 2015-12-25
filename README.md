@@ -8,7 +8,8 @@ Analyzes [strace][] output. Currently, the following analysis commands are provi
 - **io** does both **read** and **write**
 
 File descriptors are associated with file names. The association is made when syscalls like
-**open**, **creat**, **dup** or **pipe** are read from the log as well as when they get **close**d.
+**open**, **creat**, **dup** or **pipe** are read from the log and the association gets terminated
+when they get **close**d.
 
 usage
 -----
