@@ -31,14 +31,17 @@ More help can be found here:
 strace --help
 ```
 
-caveats, missing features
--------------------------
+caveats
+-------
 
 -   does only work with traces created with the usage example above, there is no support for logs
     that contain output of multiple process ids
 
 -   does not parse unfinished / resumed entries, single-threaded application runs are recommended or
     else you are going to miss a lot of entries
+
+features that will not be implemented
+-------------------------------------
 
 In the spirit of the Unix philosohpy of **do one thing and do it well**, strace-analyzer will not do
 any of the following:
