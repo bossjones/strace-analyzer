@@ -74,10 +74,10 @@ trait HasFileSummary {
       entries.foldLeft(FileSummary.empty("read"))(_ + FileSummary(_))
     }
 
-    readAnalysis.toSeq sortBy { _._2.bytes } foreach {
+    readAnalysis foreach {
       case (file,analysis)
           if config.regex.map(_.findFirstIn(file).isDefined).orElse(config.filter.map(file.contains)).getOrElse(true) =>
-        println(s"""$file ${analysis.msg}""")
+        println(analysis.msg(file))
       case _ =>
     }
   }
@@ -91,10 +91,10 @@ trait HasFileSummary {
       entries.foldLeft(FileSummary.empty("write"))(_ + FileSummary(_))
     }
 
-    writeAnalysis.toSeq sortBy { _._2.bytes } foreach {
+    writeAnalysis foreach {
       case (file,analysis)
           if config.regex.map(_.findFirstIn(file).isDefined).orElse(config.filter.map(file.contains)).getOrElse(true) =>
-        println(s"""$file ${analysis.msg}""")
+        println(analysis.msg(file))
       case _ =>
     }
   }
@@ -119,7 +119,7 @@ trait HasFileSummary {
 
     def hbpo = Memory.humanize(bpo.round)
 
-    def msg = s"""$op $hBytes in $hSeconds (~$hbps/s) with $ops ops (~$hbpo/o)"""
+    def msg(file: String) = s"""$op $hBytes in $hSeconds (~ $hbps / s) with $ops ops (~ $hbpo / o) $file"""
   }
 
   object FileSummary {

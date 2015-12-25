@@ -15,13 +15,13 @@ trait Memory {
   object humanize {
     def apply(bytes: Long): String = bytes match {
       case _ if bytes.abs < kibi => f"""$bytes%d"""
-      case _ if bytes.abs < mebi => f"""${(bytes/kibi).round}%d KiB"""
-      case _ if bytes.abs < gibi => f"""${(bytes/mebi).round}%d MiB"""
-      case _ if bytes.abs < tebi => f"""${(bytes/gibi).round}%d GiB"""
-      case _ if bytes.abs < pebi => f"""${(bytes/tebi).round}%d TiB"""
-      case _ if bytes.abs < exbi => f"""${(bytes/pebi).round}%d PiB"""
-      case _ if bytes.abs < zebi => f"""${(bytes/exbi).round}%d EiB"""
-      case _                     => f"""${(bytes/zebi).round}%d ZiB"""
+      case _ if bytes.abs < mebi => f"""${(bytes/kibi).round}%dK"""
+      case _ if bytes.abs < gibi => f"""${(bytes/mebi).round}%dM"""
+      case _ if bytes.abs < tebi => f"""${(bytes/gibi).round}%dG"""
+      case _ if bytes.abs < pebi => f"""${(bytes/tebi).round}%dT"""
+      case _ if bytes.abs < exbi => f"""${(bytes/pebi).round}%dP"""
+      case _ if bytes.abs < zebi => f"""${(bytes/exbi).round}%dE"""
+      case _                     => f"""${(bytes/zebi).round}%dZ"""
     }
   }
 }
