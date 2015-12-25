@@ -22,8 +22,8 @@ strace -T -ttt -ff -o strace.log command
 # analyze logs (command defines how they are analyzed)
 strace-analyzer <command> strace.log.4242 strace.log.4243
 
-# do stuff with the output
-strace-analyzer read strace.log.27049 | sort -h -k 2 | column -t
+# pipelining (ignore [useless use of cat award][uucaletter], this is just an example ;-)
+cat strace.log.27049 | strace-analyzer read | column -t
 ```
 
 More help can be found here:
@@ -75,6 +75,7 @@ any of the following:
         strace-analyzer read strace.log.27049 | column -t
 
 [awk]: http://man7.org/linux/man-pages/man1/gawk.1.html "gawk man page"
+[uucaletter]: http://porkmail.org/era/unix/award.html#uucaletter "useless use of cat award form letter"
 [grep]: http://man7.org/linux/man-pages/man1/grep.1.html "grep man page"
 [column]: http://man7.org/linux/man-pages/man1/column.1.html "column man page"
 [newissue]: https://github.com/wookietreiber/strace-analyzer/issues/new "open new issue"
