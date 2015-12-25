@@ -80,8 +80,8 @@ issues, features, use-cases, wish list
             1451071295.262988 dup2(3, 1)            = 1 <0.000015>
             1451071295.263039 close(3)              = 0 <0.000015>
 
-        You should search for the section *after **filename** gets opened and before its file
-        descriptor gets closed*.
+        You should search for the section after **filename** gets opened and before its file
+        descriptor gets closed.
 
         In this example, there is only a single syscall between the respective **open** and
         **close** syscalls, namely **dup2**.
