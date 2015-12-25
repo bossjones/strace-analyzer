@@ -19,10 +19,10 @@ usage
 # create logs
 strace -T -ttt -ff -o strace.log command
 
-# analyze logs (command defines how they are analyzed)
-strace-analyzer <command> strace.log.4242 strace.log.4243
+# analyze logs
+strace-analyzer command strace.log.4242 strace.log.4243
 
-# pipelining (ignore [useless use of cat award][uucaletter], this is just an example ;-)
+# pipelining, ignore the useless use of cat, this is just an example ;-)
 cat strace.log.27049 | strace-analyzer read | column -t
 ```
 
