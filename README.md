@@ -32,6 +32,15 @@ More help can be found here:
 strace --help
 ```
 
+caveats
+-------
+
+-   does only work with traces created with the usage example above, there is no support for logs
+    that contain output of multiple process ids
+
+-   does not parse unfinished / resumed entries, single-threaded application runs are recommended or
+    else you are going to miss a lot of entries
+
 issues, features, use-cases, wish list
 --------------------------------------
 
@@ -42,15 +51,6 @@ issues, features, use-cases, wish list
 -   If you recognize missing file associations in the output, i.e. bare file descriptor numbers
     without a note as to why it could not be identified, please [open an issue][newissue] and
     provide access to that particular, complete strace log, so I am able to identify the problem.
-
-caveats
--------
-
--   does only work with traces created with the usage example above, there is no support for logs
-    that contain output of multiple process ids
-
--   does not parse unfinished / resumed entries, single-threaded application runs are recommended or
-    else you are going to miss a lot of entries
 
 features that will not be implemented
 -------------------------------------
