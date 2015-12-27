@@ -27,8 +27,21 @@ package analyze
 
 sealed abstract class LogEntry {
   def epoch: String
+  def jepoch: Long = (epoch.toDouble * 1000).round
   def status: Int
   def time: String
+}
+
+trait HasBytes {
+  self: LogEntry =>
+
+  def bytes: Long
+}
+
+trait HasFD {
+  self: LogEntry =>
+
+  def fd: String
 }
 
 object LogEntry {
@@ -124,7 +137,8 @@ object LogEntry {
     }
   }
 
-  case class Read(epoch: String, fd: String, bytes: Long, time: String) extends LogEntry {
+  case class Read(epoch: String, fd: String, bytes: Long, time: String)
+      extends LogEntry with HasBytes with HasFD {
     def status = bytes.toInt
   }
 
@@ -137,7 +151,8 @@ object LogEntry {
     }
   }
 
-  case class Write(epoch: String, fd: String, bytes: Long, time: String) extends LogEntry {
+  case class Write(epoch: String, fd: String, bytes: Long, time: String)
+      extends LogEntry with HasBytes with HasFD {
     def status = bytes.toInt
   }
 
