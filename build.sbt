@@ -13,6 +13,7 @@ lazy val root = (project in file(".")).
   settings (
     name := "strace-analyzer",
     libraryDependencies += "com.github.wookietreiber" %% "scala-chart" % "0.5.0",
+    libraryDependencies += "org.scalaz.stream" %% "scalaz-stream" % "0.8",
     buildInfoKeys := Seq[BuildInfoKey](name, version),
     buildInfoPackage := "strace.analyze",
     mappings in Universal <++= name in Universal map { name =>
