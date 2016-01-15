@@ -25,7 +25,8 @@
 package strace
 package analyze
 
-import java.io._
+import java.io.BufferedInputStream
+import java.io.FileInputStream
 
 /**
   * @todo scalaz-stream / fs2
@@ -60,47 +61,52 @@ abstract class Analysis {
     )
 
     log.getLines.collect({
-      case LogEntry.Close(close) if close.status >= 0 =>
+      case LogEntry.Close(close) if close.status.toInt >= 0 =>
         fdDB -= close.fd
         close
 
-      case LogEntry.Creat(creat) if creat.status >= 0 =>
+      case LogEntry.Creat(creat) if creat.status.toInt >= 0 =>
         fdDB += (creat.fd -> creat.file)
         creat
 
-      case LogEntry.Dup(dup) if dup.status >= 0 =>
+      case LogEntry.Dup(dup) if dup.status.toInt >= 0 =>
         val where = fdDB get dup.oldFd
         val file = where.fold("no entry for dup found, probably PIPE")(identity)
         fdDB += (dup.newFd -> file)
         dup
 
-      case LogEntry.Dup2(dup2) if dup2.status >= 0 =>
+      case LogEntry.Dup2(dup2) if dup2.status.toInt >= 0 =>
         val where = fdDB get dup2.oldFd
         val file = where.fold("no entry for dup2 found, probably PIPE")(identity)
         fdDB += (dup2.newFd -> file)
         dup2
 
-      case LogEntry.Open(open) if open.status >= 0 =>
+      case LogEntry.Mmap(mmap) =>
+        for (file <- fdDB.get(mmap.fd))
+          Console.err.println(s"""$file has been mmap'ed""")
+        mmap
+
+      case LogEntry.Open(open) if open.status.toInt >= 0 =>
         fdDB += (open.fd -> open.file)
         open
 
-      case LogEntry.OpenAt(openat) if openat.status >= 0 =>
+      case LogEntry.OpenAt(openat) if openat.status.toInt >= 0 =>
         val where = fdDB get openat.wherefd
         val file = where.fold(openat.filename)(openat.file)
         fdDB += (openat.fd -> file)
         openat
 
-      case LogEntry.Pipe(pipe) if pipe.status >= 0 =>
+      case LogEntry.Pipe(pipe) if pipe.status.toInt >= 0 =>
         fdDB += (pipe.read -> "PIPE")
         fdDB += (pipe.write -> "PIPE")
         pipe
 
         // TODO ignore exit status 0?
-      case LogEntry.Read(read) if read.status >= 0 =>
+      case LogEntry.Read(read) if read.status.toInt >= 0 =>
         fdDB.get(read.fd).fold(read)(file => read.copy(fd = file))
 
         // TODO ignore exit status 0?
-      case LogEntry.Write(write) if write.status >= 0 =>
+      case LogEntry.Write(write) if write.status.toInt >= 0 =>
         fdDB.get(write.fd).fold(write)(file => write.copy(fd = file))
     }).toList
   } finally {

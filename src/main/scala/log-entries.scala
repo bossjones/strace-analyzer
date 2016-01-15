@@ -28,7 +28,7 @@ package analyze
 sealed abstract class LogEntry {
   def epoch: String
   def jepoch: Long = (epoch.toDouble * 1000).round
-  def status: Int
+  def status: String
   def time: String
 }
 
@@ -49,19 +49,19 @@ object LogEntry {
 
   val fsSep = sys props "file.separator"
 
-  case class Close(epoch: String, fd: String, status: Int, time: String) extends LogEntry
+  case class Close(epoch: String, fd: String, status: String, time: String) extends LogEntry
 
   object Close {
     val regex = """(\d+\.\d+) close\((\d+)\)\s+= (\d+) <(\d+\.\d+)>""".r
     def unapply(line: String): Option[Close] = line match {
       case regex(epoch, fd, status, time) =>
-        Some(new Close(epoch, fd, status.toInt, time))
+        Some(new Close(epoch, fd, status, time))
       case _ => None
     }
   }
 
-  case class Creat(epoch: String, file: String, fd: String, time: String) extends LogEntry {
-    def status = fd.toInt
+  case class Creat(epoch: String, file: String, status: String, time: String) extends LogEntry {
+    def fd = status
   }
 
   object Creat {
@@ -73,8 +73,8 @@ object LogEntry {
     }
   }
 
-  case class Dup(epoch: String, oldFd: String, newFd: String, time: String) extends LogEntry {
-    def status = newFd.toInt
+  case class Dup(epoch: String, oldFd: String, status: String, time: String) extends LogEntry {
+    def newFd = status
   }
 
   object Dup {
@@ -86,8 +86,8 @@ object LogEntry {
     }
   }
 
-  case class Dup2(epoch: String, oldFd: String, newFd: String, time: String) extends LogEntry {
-    def status = newFd.toInt
+  case class Dup2(epoch: String, oldFd: String, status: String, time: String) extends LogEntry {
+    def newFd = status
   }
 
   object Dup2 {
@@ -99,22 +99,33 @@ object LogEntry {
     }
   }
 
-  case class Open(epoch: String, file: String, status: Int, time: String) extends LogEntry {
-    def fd = status.toString
+  case class Mmap(epoch: String, fd: String, status: String, time: String) extends LogEntry
+
+  object Mmap {
+    val regex = """(\d+\.\d+) mmap\(.+, .+, .+, .+, (\d+), .+\)\s+= (.+) <(\d+\.\d+)>""".r
+    def unapply(line: String): Option[Mmap] = line match {
+      case regex(epoch, fd, status, time) =>
+        Some(new Mmap(epoch, fd, status, time))
+      case _ => None
+    }
+  }
+
+  case class Open(epoch: String, file: String, status: String, time: String) extends LogEntry {
+    def fd = status
   }
 
   object Open {
     val regex = """(\d+\.\d+) open\("([^"]+)", .+\)\s+= (\d+) <(\d+\.\d+)>""".r
     def unapply(line: String): Option[Open] = line match {
       case regex(epoch, file, status, time) =>
-        Some(new Open(epoch, file, status.toInt, time))
+        Some(new Open(epoch, file, status, time))
       case _ => None
     }
   }
 
-  case class OpenAt(epoch: String, wherefd: String, filename: String, status: Int, time: String) extends LogEntry {
+  case class OpenAt(epoch: String, wherefd: String, filename: String, status: String, time: String) extends LogEntry {
     def file(path: String) = s"""$path$fsSep$filename"""
-    def fd = status.toString
+    def fd = status
   }
 
   object OpenAt {
@@ -122,47 +133,47 @@ object LogEntry {
     val regex = """(\d+\.\d+) openat\((\d+|AT_FDCWD), "([^"]+)", .+\)\s+= (\d+) <(\d+\.\d+)>""".r
     def unapply(line: String): Option[OpenAt] = line match {
       case regex(epoch, wherefd, file, status, time) =>
-        Some(new OpenAt(epoch, wherefd, file, status.toInt, time))
+        Some(new OpenAt(epoch, wherefd, file, status, time))
       case _ => None
     }
   }
 
-  case class Pipe(epoch: String, read: String, write: String, status: Int, time: String) extends LogEntry
+  case class Pipe(epoch: String, read: String, write: String, status: String, time: String) extends LogEntry
 
   object Pipe {
     val regex = """(\d+\.\d+) pipe\(\[(\d+), (\d+)\]\)\s+= (\d+) <(\d+\.\d+)>""".r
     def unapply(line: String): Option[Pipe] = line match {
       case regex(epoch, read, write, status, time) =>
-        Some(new Pipe(epoch, read, write, status.toInt, time))
+        Some(new Pipe(epoch, read, write, status, time))
       case _ => None
     }
   }
 
-  case class Read(epoch: String, fd: String, reqbytes: Long, bytes: Long, time: String)
+  case class Read(epoch: String, fd: String, reqbytes: Long, status: String, time: String)
       extends LogEntry with HasBytes with HasFD {
-    def status = bytes.toInt
+    def bytes = status.toLong
   }
 
   object Read {
     val regex = """(\d+\.\d+) read\((\d+),.*, (\d+)\)\s+= (\d+) <(\d+\.\d+)>""".r
     def unapply(line: String): Option[Read] = line match {
-      case regex(epoch, fd, reqbytes, bytes, time) =>
-        Some(new Read(epoch, fd, reqbytes.toLong, bytes.toLong, time))
+      case regex(epoch, fd, reqbytes, status, time) =>
+        Some(new Read(epoch, fd, reqbytes.toLong, status, time))
       case _ => None
     }
   }
 
-  case class Write(epoch: String, fd: String, reqbytes: Long, bytes: Long, time: String)
+  case class Write(epoch: String, fd: String, reqbytes: Long, status: String, time: String)
       extends LogEntry with HasBytes with HasFD {
-    def status = bytes.toInt
+    def bytes = status.toLong
   }
 
   object Write {
     // 1451986703.082143 write(1, ""..., 1048576) = 1048576 <0.000787>
     val regex = """(\d+\.\d+) write\((\d+),.*, (\d+)\)\s+= (\d+) <(\d+\.\d+)>""".r
     def unapply(line: String): Option[Write] = line match {
-      case regex(epoch, fd, reqbytes, bytes, time) =>
-        Some(new Write(epoch, fd, reqbytes.toLong, bytes.toLong, time))
+      case regex(epoch, fd, reqbytes, status, time) =>
+        Some(new Write(epoch, fd, reqbytes.toLong, status, time))
       case _ => None
     }
   }
