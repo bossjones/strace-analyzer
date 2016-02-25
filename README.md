@@ -12,6 +12,8 @@ File descriptors are associated with file names. The association is made when sy
 **open**, **creat**, **dup** or **pipe** are read from the log and the association gets terminated
 when they get **close**d.
 
+Pre-built packages can be downloaded from the [GitHub releases page][releases].
+
 building
 --------
 
@@ -94,6 +96,7 @@ any of the following:
 [grep]: http://man7.org/linux/man-pages/man1/grep.1.html "grep man page"
 [jdk]: https://en.wikipedia.org/wiki/Java_Development_Kit "Java Development Kit"
 [newissue]: https://github.com/wookietreiber/strace-analyzer/issues/new "open new issue"
+[releases]: https://github.com/wookietreiber/strace-analyzer/releases "pre-built strace-analyzer releases"
 [sbt]: http://www.scala-sbt.org/ "sbt"
 [sort]: http://man7.org/linux/man-pages/man1/sort.1.html "sort man page"
 [strace]: http://sourceforge.net/projects/strace/ "strace home page"
