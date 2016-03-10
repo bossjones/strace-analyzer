@@ -4,7 +4,7 @@ enablePlugins(UniversalPlugin)
 
 organization in ThisBuild := "com.github.wookietreiber"
 
-scalaVersion in ThisBuild := "2.11.7"
+scalaVersion in ThisBuild := "2.11.8"
 
 git.baseVersion in ThisBuild := "0.2.0"
 
