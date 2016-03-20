@@ -23,7 +23,7 @@ build dependencies:
 - [sbt][]
 
 ```bash
-git clone https://github.com/wookietreiber/strace-analyzer.git
+git clone -b master git://github.com/wookietreiber/strace-analyzer.git
 cd strace-analyzer
 sbt stage
 export PATH="$PWD/target/universal/stage/bin:$PATH"
