@@ -75,19 +75,19 @@ issues, features, use-cases, wish list
 features that will not be implemented
 -------------------------------------
 
-In the spirit of the Unix philosohpy of **do one thing and do it well**, strace-analyzer will not do
+In the spirit of the Unix philosohpy of **do one thing and do it well**, strace-analyzer will **not** do
 any of the following:
 
--   filtering, use tools like [grep][] or [awk][], e.g.:
+-   *filtering*, use tools like [grep][] or [awk][], e.g.:
 
         strace-analyzer read strace.log.1835 | grep scala
         strace-analyzer read strace.log.1835 | awk '/scala/'
 
--   sorting, use the [sort][] command line utility, e.g.:
+-   *sorting*, use the [sort][] command line utility, e.g.:
 
         strace-analyzer read strace.log.27049 | sort -h -k 2
 
--   pretty tabular output printing, use the [column][] command line utility, e.g.:
+-   pretty *tabular output* printing, use the [column][] command line utility, e.g.:
 
         strace-analyzer read strace.log.27049 | column -t
 
