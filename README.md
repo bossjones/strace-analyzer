@@ -46,6 +46,7 @@ cat app-strace.log.27049 | strace-analyzer read | column -t
 More help can be gotten via:
 
 ```bash
+man strace-analyzer
 strace-analyzer --help
 ```
 
