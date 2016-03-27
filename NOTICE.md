@@ -25,9 +25,9 @@ whose licenses, conditions, copyright notices, etc. are listed here.
 ## Scala License
 
 ```
-Copyright (c) 2002-2015 EPFL
+Copyright (c) 2002-2016 EPFL
 
-Copyright (c) 2011-2015 Typesafe, Inc.
+Copyright (c) 2011-2016 Lightbend, Inc.
 
 All rights reserved.
 
