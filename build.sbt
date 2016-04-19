@@ -6,7 +6,7 @@ organization in ThisBuild := "com.github.wookietreiber"
 
 scalaVersion in ThisBuild := "2.11.8"
 
-git.baseVersion in ThisBuild := "0.2.0"
+git.baseVersion in ThisBuild := "0.3.0"
 
 lazy val root = (project in file(".")).
   enablePlugins(BuildInfoPlugin).
