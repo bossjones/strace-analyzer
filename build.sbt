@@ -6,12 +6,13 @@ organization in ThisBuild := "com.github.wookietreiber"
 
 scalaVersion in ThisBuild := "2.11.8"
 
-git.baseVersion in ThisBuild := "0.1.1"
+git.baseVersion in ThisBuild := "0.2.0"
 
 lazy val root = (project in file(".")).
   enablePlugins(BuildInfoPlugin).
   settings (
     name := "strace-analyzer",
+    libraryDependencies += "com.github.wookietreiber" %% "scala-chart" % "0.5.0",
     buildInfoKeys := Seq[BuildInfoKey](name, version),
     buildInfoPackage := "strace.analyze",
     mappings in Universal <++= name in Universal map { name =>
