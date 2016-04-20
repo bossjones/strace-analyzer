@@ -25,6 +25,8 @@
 package strace
 package analyze
 
+import scalaz.Monoid
+
 trait HasFileOpSummary {
   case class FileOpSummary(bytes: Long, ops: Long, reqbytes: Long, seconds: Double) {
     def +(that: FileOpSummary): FileOpSummary = FileOpSummary (
@@ -52,5 +54,10 @@ trait HasFileOpSummary {
 
     def apply(entry: LogEntry with HasBytes): FileOpSummary =
       FileOpSummary(bytes = entry.bytes, ops = 1, reqbytes = entry.reqbytes, seconds = entry.time.toDouble)
+
+    implicit val FileOpSummaryMonoid: Monoid[FileOpSummary] = new Monoid[FileOpSummary] {
+      def zero = FileOpSummary.empty
+      def append(f1: FileOpSummary, f2: => FileOpSummary): FileOpSummary = f1 + f2
+    }
   }
 }

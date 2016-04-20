@@ -25,6 +25,9 @@
 package strace
 package analyze
 
+import scalaz.concurrent.Task
+import scalaz.stream._
+
 object Summary extends Analysis with HasFileOpSummary {
   def analyze(implicit config: Config): Unit =
     for ((log,entries) <- parseLogs) {
@@ -32,10 +35,10 @@ object Summary extends Analysis with HasFileOpSummary {
       printSummary(log, entries, "write") { case entry: LogEntry.Write => entry }
     }
 
-  def printSummary(log: String, entries: List[LogEntry], op: String)
-    (pf: PartialFunction[LogEntry,LogEntry with HasBytes]): Unit = {
+  def printSummary(log: String, entries: Process[Task,LogEntry], op: String)
+                  (pf: PartialFunction[LogEntry,LogEntry with HasBytes]): Unit = {
 
-    val summary = entries.collect(pf).foldLeft(FileOpSummary.empty)(_ + FileOpSummary(_))
+    val summary = entries.collect(pf).runFoldMap(FileOpSummary(_)).run
 
     val output = summary.humanized(op)
 

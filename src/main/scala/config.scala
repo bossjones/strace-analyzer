@@ -25,6 +25,4 @@
 package strace
 package analyze
 
-import java.io.File
-
-case class Config(logs: List[File] = Nil)
+case class Config(logs: List[String] = Nil)

@@ -25,11 +25,9 @@
 package strace
 package analyze
 
-import java.io._
+import scalaz.concurrent.Task
+import scalaz.stream._
 
-/**
-  * @todo scalaz-stream / fs2
-  */
 abstract class Analysis {
 
   val bufSize = math.pow(2,20).toInt
@@ -38,28 +36,30 @@ abstract class Analysis {
   def analyze(implicit config: Config): Unit
 
   /** Returns the log entries grouped by log input. */
-  def parseLogs(implicit config: Config): Iterator[(String,List[LogEntry])] =
+  def parseLogs(implicit config: Config): Iterator[(String,Process[Task,LogEntry])] =
     if (config.logs.isEmpty)
-      Iterator("STDIN" -> parseLog(io.Source.stdin))
+      Iterator("STDIN" -> parseLog(io.stdInLines))
     else {
       val xs = for {
         log <- config.logs.distinct.toIterator
-        source = io.Source.fromInputStream(new BufferedInputStream(new FileInputStream(log), bufSize))
+        source = io.linesR(log) // TODO use appropriate buffer size (using **bufSize**)
         entries = parseLog(source)
-      } yield log.getName -> entries
+      } yield log -> entries
 
       xs
     }
 
   /** Returns a parsed strace log. */
-  def parseLog(log: io.Source): List[LogEntry] = try {
+  def parseLog(log: Process[Task,String]): Process[Task,LogEntry] = {
+
+    // initialize file descriptor database with standard streams
     val fdDB = collection.mutable.Map[String,String] (
       "0" -> "STDIN",
       "1" -> "STDOUT",
       "2" -> "STDERR"
     )
 
-    log.getLines.collect({
+    log.collect({
       case LogEntry.Close(close) if close.status >= 0 =>
         fdDB -= close.fd
         close
@@ -102,8 +102,6 @@ abstract class Analysis {
         // TODO ignore exit status 0?
       case LogEntry.Write(write) if write.status >= 0 =>
         fdDB.get(write.fd).fold(write)(file => write.copy(fd = file))
-    }).toList
-  } finally {
-    log.close()
+    })
   }
 }

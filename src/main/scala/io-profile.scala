@@ -27,6 +27,10 @@ package analyze
 
 import scalax.chart.api._
 
+import scalaz.concurrent.Task
+import scalaz.stream._
+import scalaz.std.map._
+
 object IOProfile extends Analysis {
   def analyze(implicit config: Config): Unit =
     for ((log,entries) <- parseLogs) {
@@ -39,8 +43,9 @@ object IOProfile extends Analysis {
       }
     }
 
-  def saveChart(log: String, entries: List[LogEntry], op: String)
-    (pf: PartialFunction[LogEntry,LogEntry with HasBytes with HasFD]): Unit = {
+  def saveChart(log: String, entries: Process[Task,LogEntry], op: String)
+               (pf: PartialFunction[LogEntry,LogEntry with HasBytes with HasFD]): Unit = {
+
     val filtered = entries.collect(pf)
 
     for ((file,entries) <- filtered.groupBy(_.fd)) {

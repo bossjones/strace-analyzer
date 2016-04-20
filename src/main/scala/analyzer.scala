@@ -74,10 +74,9 @@ object Analyzer extends App {
     case Nil =>
       conf.copy(logs = conf.logs.reverse)
 
-    case x :: tail =>
-      val file = new File(x)
-      if (!file.exists) {
-        Console.err.println(s"""error: file "$x" does not exist""")
+    case file :: tail =>
+      if (!new File(file).exists) {
+        Console.err.println(s"""error: file "$file" does not exist""")
         sys exit 1
       }
       accumulate(conf.copy(logs = file :: conf.logs))(tail)

@@ -25,15 +25,19 @@
 package strace
 package analyze
 
+import scalaz.concurrent.Task
+import scalaz.stream._
+import scalaz.std.map._
+
 trait PerFileSummary extends HasFileOpSummary {
-  def analysis(entries: List[LogEntry], op: String)
-    (pf: PartialFunction[LogEntry,LogEntry with HasBytes with HasFD]): Unit = {
+  def analysis(entries: Process[Task,LogEntry], op: String)
+              (pf: PartialFunction[LogEntry,LogEntry with HasBytes with HasFD]): Unit = {
 
     val filtered = entries.collect(pf)
 
-    val analysis = filtered.groupBy(_.fd) mapValues { entries =>
-      entries.foldLeft(FileOpSummary.empty)(_ + FileOpSummary(_))
-    }
+    val analysis = filtered.runFoldMap({ entry =>
+      Map(entry.fd -> FileOpSummary(entry))
+    }).run
 
     for ((file,analysis) <- analysis) {
       val output = analysis.humanized(op)
