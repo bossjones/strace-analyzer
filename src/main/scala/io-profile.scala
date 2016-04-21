@@ -29,7 +29,10 @@ import scalax.chart.api._
 
 import scalaz.concurrent.Task
 import scalaz.stream._
+import scalaz.std.anyVal._
 import scalaz.std.map._
+
+import org.jfree.data.time.Second
 
 object IOProfile extends Analysis {
   def analyze(implicit config: Config): Unit =
@@ -48,11 +51,15 @@ object IOProfile extends Analysis {
 
     val filtered = entries.collect(pf)
 
-    for ((file,entries) <- filtered.groupBy(_.fd)) {
+    val analysis = filtered.runFoldMap({ entry =>
+      Map(entry.fd -> Map(new Second(new java.util.Date(entry.jepoch)) -> entry.bytes))
+    }).run
+
+    for ((file,data) <- analysis) {
       val filename = new java.io.File(file).getName
       val logname = new java.io.File(log).getName
 
-      val chart = genChart(entries)
+      val chart = genChart(data)
 
       chart.saveAsPNG (
         file = s"""strace-analyzer-profile-$op-$logname-$filename.png""",
@@ -61,19 +68,9 @@ object IOProfile extends Analysis {
     }
   }
 
-  def genChart[A <: LogEntry with HasBytes](entries: List[A]) = {
+  def genChart[A <: LogEntry with HasBytes](data: Map[Second,Long]) = {
     import java.text._
-    import java.util.Date
     import org.jfree.chart.axis.NumberAxis
-    import org.jfree.data.time.Second
-
-    val raw = for {
-      entry <- entries
-      time = new Second(new Date(entry.jepoch))
-      value = entry.bytes
-    } yield (time,value)
-
-    val data = raw.groupBy(_._1).mapValues(_.foldLeft(0L)(_ + _._2))
 
     val chart = XYBarChart(data.toTimeSeries(""), legend = false)
     chart.plot.range.axis.label.text = "bytes"
