@@ -34,7 +34,7 @@ import scalaz.stream._
 object util {
   implicit class RichProcess[O](underlying: Process[Task,O]) {
 
-    def groupBy[K,O2](f: O => K)(implicit M: Monoid[O]): Task[Map[K, List[O]]] =
+    def groupBy[K](f: O => K)(implicit M: Monoid[O]): Task[Map[K, List[O]]] =
       underlying runFoldMap { cur =>
         Map(f(cur) -> List(cur))
       }
