@@ -28,10 +28,16 @@ package analyze
 import scalaz.Monoid
 import scalaz.concurrent.Task
 import scalaz.std.map._
+import scalaz.std.list._
 import scalaz.stream._
 
 object util {
   implicit class RichProcess[O](underlying: Process[Task,O]) {
+
+    def groupBy[K,O2](f: O => K)(implicit M: Monoid[O]): Task[Map[K, List[O]]] =
+      underlying runFoldMap { cur =>
+        Map(f(cur) -> List(cur))
+      }
 
     def groupByFoldMonoid[K](f: O => K)(implicit MO: Monoid[O]): Task[Map[K, O]] =
       groupByFoldMap(f)(identity)
