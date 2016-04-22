@@ -25,44 +25,21 @@
 package strace
 package analyze
 
+import scalaz.Monoid
 import scalaz.concurrent.Task
+import scalaz.std.map._
 import scalaz.stream._
 
-trait PerFileSummary extends HasFileOpSummary {
-  def analysis(entries: Process[Task,LogEntry], op: String)
-              (pf: PartialFunction[LogEntry,LogEntry with HasBytes with HasFD]): Unit = {
+object util {
+  implicit class RichProcess[O](underlying: Process[Task,O]) {
 
-    import util._
+    def groupByFoldMonoid[K](f: O => K)(implicit MO: Monoid[O]): Task[Map[K, O]] =
+      groupByFoldMap(f)(identity)
 
-    val filtered = entries.collect(pf)
+    def groupByFoldMap[K,O2](f: O => K)(g: O => O2)(implicit MO: Monoid[O2]): Task[Map[K, O2]] =
+      underlying runFoldMap { cur =>
+        Map(f(cur) -> g(cur))
+      }
 
-    val analysis = filtered.groupByFoldMap(_.fd)(FileOpSummary(_)).run
-
-    for ((file,analysis) <- analysis) {
-      val output = analysis.humanized(op)
-      println(s"""$output $file""")
-    }
   }
-}
-
-object IO extends Analysis with PerFileSummary {
-  def analyze(implicit config: Config): Unit =
-    for ((_,entries) <- parseLogs) {
-      analysis(entries, op = "read") { case entry: LogEntry.Read => entry }
-      analysis(entries, op = "write") { case entry: LogEntry.Write => entry }
-    }
-}
-
-object Read extends Analysis with PerFileSummary {
-  def analyze(implicit config: Config): Unit =
-    for ((_,entries) <- parseLogs) {
-      analysis(entries, op = "read") { case entry: LogEntry.Read => entry }
-    }
-}
-
-object Write extends Analysis with PerFileSummary {
-  def analyze(implicit config: Config): Unit =
-    for ((_,entries) <- parseLogs) {
-      analysis(entries, op = "write") { case entry: LogEntry.Write => entry }
-    }
 }

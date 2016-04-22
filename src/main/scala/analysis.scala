@@ -59,7 +59,7 @@ abstract class Analysis {
       "2" -> "STDERR"
     )
 
-    log.collect({
+    log collect {
       case LogEntry.Close(close) if close.status >= 0 =>
         fdDB -= close.fd
         close
@@ -102,6 +102,6 @@ abstract class Analysis {
         // TODO ignore exit status 0?
       case LogEntry.Write(write) if write.status >= 0 =>
         fdDB.get(write.fd).fold(write)(file => write.copy(fd = file))
-    })
+    }
   }
 }

@@ -49,13 +49,15 @@ object IOProfile extends Analysis {
   def saveChart(log: String, entries: Process[Task,LogEntry], op: String)
                (pf: PartialFunction[LogEntry,LogEntry with HasBytes with HasFD]): Unit = {
 
+    import util._
+
     val filtered = entries.collect(pf)
 
-    val analysis = filtered.runFoldMap({ entry =>
-      Map(entry.fd -> Map(new Second(new java.util.Date(entry.jepoch)) -> entry.bytes))
-    }).run
+    val analysis = filtered.groupByFoldMap(_.fd) { entry =>
+      Map(new Second(new java.util.Date(entry.jepoch)) -> entry.bytes)
+    }
 
-    for ((file,data) <- analysis) {
+    for ((file,data) <- analysis.run) {
       val filename = new java.io.File(file).getName
       val logname = new java.io.File(log).getName
 
