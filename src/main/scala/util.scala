@@ -34,16 +34,16 @@ import scalaz.stream._
 object util {
   implicit class RichProcess[O](underlying: Process[Task,O]) {
 
-    def groupBy[K](f: O => K): Task[Map[K, List[O]]] =
-      groupByFoldMap(f)(List(_))
-
-    def groupByFoldMonoid[K](f: O => K)(implicit MO: Monoid[O]): Task[Map[K, O]] =
-      groupByFoldMap(f)(identity)
-
-    def groupByFoldMap[K,O2](f: O => K)(g: O => O2)(implicit MO: Monoid[O2]): Task[Map[K, O2]] =
+    def runGroupByFoldMap[K,O2](f: O => K)(g: O => O2)(implicit MO: Monoid[O2]): Task[Map[K, O2]] =
       underlying runFoldMap { cur =>
         Map(f(cur) -> g(cur))
       }
+
+    def runGroupByFoldMonoid[K](f: O => K)(implicit MO: Monoid[O]): Task[Map[K, O]] =
+      runGroupByFoldMap(f)(identity)
+
+    def runGroupBy[K](f: O => K): Task[Map[K, List[O]]] =
+      runGroupByFoldMap(f)(List(_))
 
   }
 }

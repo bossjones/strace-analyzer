@@ -53,7 +53,7 @@ object IOProfile extends Analysis {
 
     val filtered = entries.collect(pf)
 
-    val analysis = filtered.groupByFoldMap(_.fd) { entry =>
+    val analysis = filtered.runGroupByFoldMap(_.fd) { entry =>
       Map(new Second(new java.util.Date(entry.jepoch)) -> entry.bytes)
     }
 

@@ -36,7 +36,7 @@ trait PerFileSummary extends HasFileOpSummary {
 
     val filtered = entries.collect(pf)
 
-    val analysis = filtered.groupByFoldMap(_.fd)(FileOpSummary(_)).run
+    val analysis = filtered.runGroupByFoldMap(_.fd)(FileOpSummary(_)).run
 
     for ((file,analysis) <- analysis) {
       val output = analysis.humanized(op)
