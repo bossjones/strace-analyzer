@@ -30,18 +30,23 @@ import scalaz.stream._
 
 object Summary extends Analysis with HasFileOpSummary {
   def analyze(implicit config: Config): Unit =
-    for ((log,entries) <- parseLogs) {
-      printSummary(log, entries, "read") { case entry: LogEntry.Read => entry }
+    for ((log,entries) <- parseLogs) { // TODO don't use for comprehension but why/tee depending on
+                                       //which one it was so the parsing has to be done only once
+      printSummary(log, entries, "read" ) { case entry: LogEntry.Read  => entry }
       printSummary(log, entries, "write") { case entry: LogEntry.Write => entry }
     }
 
   def printSummary(log: String, entries: Process[Task,LogEntry], op: String)
                   (pf: PartialFunction[LogEntry,LogEntry with HasBytes]): Unit = {
 
-    val summary = entries.collect(pf).runFoldMap(FileOpSummary(_)).run
+    val filtered = entries.collect(pf)
 
-    val output = summary.humanized(op)
+    val accumulated = filtered.foldMap(FileOpSummary(_))
 
-    println(s"""$log $output""")
+    val humanized = accumulated map { acc =>
+      s"""$log ${acc.humanized(op)}"""
+    }
+
+    humanized.to(io.stdOutLines).run.run
   }
 }
